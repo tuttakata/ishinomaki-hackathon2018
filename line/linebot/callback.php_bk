@@ -1,0 +1,224 @@
+<?php
+$lib_dir = __DIR__ . '/lib';
+set_include_path(get_include_path() . PATH_SEPARATOR . $lib_dir . '/PEAR');
+//require_once 'MDB2.php';
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/config.php';
+
+$select_sql = <<< SELECT_SQL
+select count(*)
+from user
+where uid = ?
+SELECT_SQL;
+
+$select_message_sql = <<< SELECT_SQL
+select *
+from messages
+where message = ?
+SELECT_SQL;
+
+$insert_sql = <<< INSERT_SQL
+INSERT INTO
+user(uid,group_id) VALUES (?,?);
+INSERT_SQL;
+
+$update_sql = <<< UPDATE_SQL
+UPDATE messages
+SET now_issue = ?
+WHERE message = ?;
+UPDATE_SQL;
+
+$error = NULL;
+$dbh = NULL;
+
+try {
+    // DB接続
+    $dbh = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8;', DB_USER, DB_PASSWORD);
+
+    //callback確認
+    $obj = json_decode(file_get_contents('php://input'));
+
+    //textとreplyToken取得
+    $event = $obj->{"events"}[0];
+    $type = $event->{"message"}->{"type"};
+    $text = $event->{"message"}->{"text"};
+    $replyToken = $event->{"replyToken"};
+    $uid = $event->{"source"}->{"userId"};
+    $message = "";
+    //メッセージ以外のときは何も返さず終了
+    if ($type != "text") {
+        exit;
+    }
+    //キーワードとマッチするかのフラグ
+    $matchFlag = FALSE;
+    //キーワードごとにgroup_idを変更してDB登録
+    if (preg_match('/^.*金.*$/', $text)) {// /^.*YT.*$/ これで前後文字
+        $group_id = 0;
+        $message = "金";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*1000.*$/', $text)){
+        $group_id = 0;
+        $message = "1000";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*X-Video.*$/', $text)){
+        $group_id = 0;
+        $message = "X-Video";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*58.*$/', $text)){
+        $group_id = 0;
+        $message = "58";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*人体練成.*$/', $text)){
+        $group_id = 0;
+        $message = "人体練成";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*渡辺.*$/', $text)){
+        $group_id = 0;
+        $message = "渡辺";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*失恋休暇.*$/', $text)){
+        $group_id = 0;
+        $message = "失恋休暇";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*年間休日2日.*$/', $text)){
+        $group_id = 0;
+        $message = "年間休日2日";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*森林伐採.*$/', $text)){
+        $group_id = 0;
+        $message = "森林伐採";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*ウンチ.*$/', $text)){
+        $group_id = 0;
+        $message = "ウンチ";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*錬金術師.*$/', $text)){
+        $group_id = 0;
+        $message = "錬金術師";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*ブタ野郎.*$/', $text)){
+        $group_id = 0;
+        $message = "ブタ野郎";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*あぼたん.*$/', $text)){
+        $group_id = 0;
+        $message = "あぼたん";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*脱糞.*$/', $text)){
+        $group_id = 0;
+        $message = "脱糞";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*爆誕.*$/', $text)){
+        $group_id = 0;
+        $message = "爆誕";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*ラスク.*$/', $text)){
+        $group_id = 0;
+        $message = "ラスク";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*メガネ.*$/', $text)){
+        $group_id = 0;
+        $message = "メガネ";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*筋トレ.*$/', $text)){
+        $group_id = 0;
+        $message = "筋トレ";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*エベレーター.*$/', $text)){
+        $group_id = 0;
+        $message = "エベレーター";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*モルモット.*$/', $text)){
+        $group_id = 0;
+        $message = "モルモット";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*ちんくん.*$/', $text)){
+        $group_id = 0;
+        $message = "ちんくん";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*脇.*$/', $text)){
+        $group_id = 0;
+        $message = "脇";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*全裸.*$/', $text)){
+        $group_id = 0;
+        $message = "脇";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*銀河.*$/', $text)){
+        $group_id = 0;
+        $message = "銀河";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*用務員.*$/', $text)){
+        $group_id = 0;
+        $message = "用務員";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*童貞.*$/', $text)){
+        $group_id = 0;
+        $message = "童貞";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*腰.*$/', $text)){
+        $group_id = 0;
+        $message = "腰";
+        $matchFlag = TRUE;
+    }else if(preg_match('/^.*サイト.*$/', $text)){
+        $text = 'クロストーク：http://www.willink.co.jp/linebot/test/crosstalk.html '."\n\n".'クロストーク1年後：http://www.willink.co.jp/linebot/test/crosstalk1later.html'."\n\n".'社長メッセージ：http://www.willink.co.jp/linebot/test/message.html'."\n\n".'福利厚生:http://www.willink.co.jp/linebot/test/welfare.html';
+    }else if(preg_match('/^.*ルール.*$/', $text)){
+        $text = '意味のないワードはオウム返しするよ。'."\n\n".'「サイト」と呟くとURLを渡すぞ。そこに違和感のあるキーワードを見つけてここに送信して！'."\n".'正解だったら抽選に参加できるよ！'."\n\n".'ただ、仮に正解でも先に2人同じ正解を見つけていた場合、不正解になるから、その時は他のキーワードを探してね！';
+    }
+    $message = str_replace("n", "%0D%0A", $message);
+
+    //messageテーブルを見て、キーワードの有効数が切れているか確認
+    $select_stmt_message = $dbh->prepare($select_message_sql);
+    $select_stmt_message->execute(array($message));
+    $res_message = $select_stmt_message->fetch();
+    //最大数と現在数が一致している場合、インサートフラグをFALSEにする
+    if($res_message['max_issue'] == $res_message['now_issue']){
+        $matchFlag = FALSE;
+    }else{
+        //有効数が切れていない場合は、カウントを増やすUPDATE処理を実行
+        $dbh->beginTransaction();
+        $update_stmt = $dbh->prepare($update_sql);
+        $res = $update_stmt->execute(array($res_message['now_issue']+1,$message));
+        if (!$res) {
+            $dbh->rollBack();
+        } else {
+            $dbh->commit();
+        }
+    }
+
+    //userテーブルにインサート処理
+    if($matchFlag){
+        $select_stmt = $dbh->prepare($select_sql);
+        $select_stmt->execute(array($uid));
+        $res = $select_stmt->fetch();
+        $count = $res[0];
+        //未登録の場合のみ抽選受付する
+        if ($count == '0' || $count == null) {
+            $dbh->beginTransaction();
+            $insert_stmt = $dbh->prepare($insert_sql);
+            $res = $insert_stmt->execute(array($uid,$group_id));
+            if (!$res) {
+                $dbh->rollBack();
+                $text = "エラーが発生しました。\nもう一度、キーワードを入力してください。";
+            } else {
+                $dbh->commit();
+                $text = "抽選参加を受け付けました。";
+            }
+        }
+    }
+
+    // LINE SDK　利用版
+    $httpClient = new \LINE\LINEBot\HTTPClient\CurlHTTPClient(TOKEN);
+
+    $bot = new \LINE\LINEBot($httpClient, ['channelSecret' => SECRET]);
+
+    $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder($text);
+    $response = $bot->replyMessage($replyToken, $textMessageBuilder);
+
+    echo $response->getHTTPStatus() . ' ' . $response->getRawBody();
+} catch (Exception $e) {
+    ob_start();
+    var_dump($e->getMessage());
+    $raw = ob_get_clean();
+    file_put_contents('dump.txt', $raw . "\n=====================================\n", FILE_APPEND);
+}

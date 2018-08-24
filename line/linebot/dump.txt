@@ -1,0 +1,32 @@
+array(2) {
+  ["id"]=>
+  string(2) "29"
+  [0]=>
+  string(2) "29"
+}
+
+=====================================
+array(2) {
+  ["id"]=>
+  string(2) "29"
+  [0]=>
+  string(2) "29"
+}
+
+=====================================
+object(PDOStatement)#4 (1) {
+  ["queryString"]=>
+  string(38) "select id
+from user
+where group_id = ?"
+}
+
+=====================================
+object(PDOStatement)#4 (1) {
+  ["queryString"]=>
+  string(38) "select id
+from user
+where group_id = ?"
+}
+
+=====================================
